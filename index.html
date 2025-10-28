@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор схем для вышивки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f7f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #8a2be2, #4169e1);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .upload-section, .result-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4169e1;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #8a2be2;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background-color: #f5f0ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #8a2be2;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .range-container {
+            position: relative;
+            margin-top: 15px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #8a2be2 0%, #8a2be2 var(--fill-percent, 50%), #e0e0e0 var(--fill-percent, 50%), #e0e0e0 100%);
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #8a2be2;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #8a2be2;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 1rem;
+        }
+        
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .color-item {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .color-item.selected {
+            border: 2px solid #333;
+            transform: scale(1.1);
+        }
+        
+        .btn {
+            background-color: #4169e1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #3151c9;
+            transform: translateY(-2px);
+        }
+        
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .preview {
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .preview canvas {
+            cursor: crosshair;
+        }
+        
+        .edit-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .edit-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .edit-mode-btn {
+            background-color: #8a2be2;
+            color: white;
+        }
+        
+        .edit-mode-btn.active {
+            background-color: #5a0aa2;
+            box-shadow: 0 0 0 2px #8a2be2;
+        }
+        
+        .history-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .history-btn {
+            background-color: #666;
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .history-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .history-btn:hover:not(:disabled) {
+            background-color: #555;
+        }
+        
+        .reset-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        .legend {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .legend-item:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .legend-item.selected {
+            background-color: #e0d6ff;
+            border-left: 3px solid #8a2be2;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        .legend-symbol {
+            width: 25px;
+            text-align: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-info {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .actions .btn {
+            flex: 1;
+        }
+        
+        .btn-download {
+            background-color: #8a2be2;
+        }
+        
+        .btn-download:hover {
+            background-color: #7a1ad2;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4169e1;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .scheme-info {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .preview canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .edit-tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        
+        .history-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Генератор схем для вышивки</h1>
+            <p class="subtitle">Преобразуйте любое изображение в схему для вышивки с возможностью редактирования</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title">Загрузите изображение</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p>Перетащите изображение сюда или нажмите для выбора</p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*">
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="colorsCount">Количество цветов: <span id="colorsValue">50</span></label>
+                        <div class="range-container">
+                            <input type="range" id="colorsCount" min="5" max="100" value="50">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="gridSize">Размер сетки: <span id="gridValue">50</span> × <span id="gridValue2">50</span></label>
+                        <div class="range-container">
+                            <input type="range" id="gridSize" min="20" max="100" value="50">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="symbolsType">Тип символов:</label>
+                        <select id="symbolsType">
+                            <option value="letters">Буквы (A-Z, AA-ZZ)</option>
+                            <option value="numbers">Цифры (1-100)</option>
+                            <option value="shapes">Символы (100 символов)</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" id="generateBtn">Создать схему</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h2 class="section-title">Схема для вышивки</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Обрабатываем изображение...</p>
+                </div>
+                
+                <div class="result-container">
+                    <div class="preview" id="preview">
+                        <p>Схема появится здесь после обработки</p>
+                        <div class="edit-tooltip" id="editTooltip">Кликните для изменения цвета</div>
+                    </div>
+                    
+                    <div class="edit-controls">
+                        <button class="edit-btn edit-mode-btn" id="editModeBtn">✏️ Режим редактирования</button>
+                        <div class="history-controls">
+                            <button class="edit-btn history-btn" id="undoBtn" title="Отменить" disabled>↶</button>
+                            <button class="edit-btn history-btn" id="redoBtn" title="Повторить" disabled>↷</button>
+                        </div>
+                        <button class="edit-btn reset-btn" id="resetBtn">🔄 Сбросить</button>
+                    </div>
+                    <div class="history-info" id="historyInfo">История: 0 действий</div>
+                    
+                    <div class="scheme-info" id="schemeInfo"></div>
+                    
+                    <div class="legend" id="legend"></div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-download" id="downloadBtn" disabled>Скачать схему</button>
+                        <button class="btn" id="printBtn" disabled>Печать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Генератор схем для вышивки | Создано с <3 для рукодельниц</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const colorsCount = document.getElementById('colorsCount');
+            const colorsValue = document.getElementById('colorsValue');
+            const gridSize = document.getElementById('gridSize');
+            const gridValue = document.getElementById('gridValue');
+            const gridValue2 = document.getElementById('gridValue2');
+            const symbolsType = document.getElementById('symbolsType');
+            const generateBtn = document.getElementById('generateBtn');
+            const preview = document.getElementById('preview');
+            const legend = document.getElementById('legend');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const printBtn = document.getElementById('printBtn');
+            const loading = document.getElementById('loading');
+            const schemeInfo = document.getElementById('schemeInfo');
+            const editModeBtn = document.getElementById('editModeBtn');
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const editTooltip = document.getElementById('editTooltip');
+            const historyInfo = document.getElementById('historyInfo');
+            
+            let uploadedImage = null;
+            let currentScheme = null;
+            let isEditMode = false;
+            let selectedColorIndex = 0;
+            let originalSchemeData = null;
+            
+            // История действий
+            let actionHistory = [];
+            let currentHistoryIndex = -1;
+            const MAX_HISTORY = 50;
+            
+            // Функция для обновления позиции ползунка и заполнения
+            function updateRangeInput(rangeInput, valueElement) {
+                const min = parseInt(rangeInput.min);
+                const max = parseInt(rangeInput.max);
+                const value = parseInt(rangeInput.value);
+                
+                // Обновляем текстовое значение
+                valueElement.textContent = value;
+                
+                // Вычисляем процент заполнения
+                const percent = ((value - min) / (max - min)) * 100;
+                
+                // Обновляем CSS переменную для градиента
+                rangeInput.style.setProperty('--fill-percent', percent + '%');
+            }
+            
+            // Инициализация ползунков
+            updateRangeInput(colorsCount, colorsValue);
+            updateRangeInput(gridSize, gridValue);
+            
+            // Обновление значений ползунков
+            colorsCount.addEventListener('input', function() {
+                updateRangeInput(this, colorsValue);
+                gridValue2.textContent = this.value;
+            });
+            
+            gridSize.addEventListener('input', function() {
+                updateRangeInput(this, gridValue);
+                gridValue2.textContent = this.value;
+            });
+            
+            // Обработка загрузки файла
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f0e6ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files.length) {
+                    handleFileSelect(this.files[0]);
+                }
+            });
+            
+            function handleFileSelect(file) {
+                if (!file.type.match('image.*')) {
+                    alert('Пожалуйста, выберите файл изображения');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    uploadedImage = new Image();
+                    uploadedImage.onload = function() {
+                        uploadArea.innerHTML = `
+                            <div style="max-width: 100%; max-height: 150px; overflow: hidden; border-radius: 5px;">
+                                <img src="${e.target.result}" style="max-width: 100%; max-height: 150px;">
+                            </div>
+                            <p>Изображение загружено (${uploadedImage.width}×${uploadedImage.height})</p>
+                        `;
+                    };
+                    uploadedImage.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // Переключение режима редактирования
+            editModeBtn.addEventListener('click', function() {
+                isEditMode = !isEditMode;
+                if (isEditMode) {
+                    this.classList.add('active');
+                    this.textContent = '✏️ Режим редактирования (вкл)';
+                    if (currentScheme) {
+                        currentScheme.canvas.style.cursor = 'crosshair';
+                    }
+                } else {
+                    this.classList.remove('active');
+                    this.textContent = '✏️ Режим редактирования';
+                    if (currentScheme) {
+                        currentScheme.canvas.style.cursor = 'default';
+                    }
+                }
+            });
+            
+            // Функция для добавления действия в историю
+            function addToHistory(action) {
+                // Удаляем все действия после текущего индекса
+                actionHistory = actionHistory.slice(0, currentHistoryIndex + 1);
+                
+                // Добавляем новое действие
+                actionHistory.push(action);
+                
+                // Ограничиваем размер истории
+                if (actionHistory.length > MAX_HISTORY) {
+                    actionHistory.shift();
+                }
+                
+                currentHistoryIndex = actionHistory.length - 1;
+                updateHistoryControls();
+            }
+            
+            // Функция для обновления состояния кнопок истории
+            function updateHistoryControls() {
+                undoBtn.disabled = currentHistoryIndex < 0;
+                redoBtn.disabled = currentHistoryIndex >= actionHistory.length - 1;
+                historyInfo.textContent = `История: ${currentHistoryIndex + 1}/${actionHistory.length} действий`;
+            }
+            
+            // Отмена действия
+            undoBtn.addEventListener('click', function() {
+                if (currentHistoryIndex >= 0) {
+                    const action = actionHistory[currentHistoryIndex];
+                    undoAction(action);
+                    currentHistoryIndex--;
+                    updateHistoryControls();
+                }
+            });
+            
+            // Повтор действия
+            redoBtn.addEventListener('click', function() {
+                if (currentHistoryIndex < actionHistory.length - 1) {
+                    currentHistoryIndex++;
+                    const action = actionHistory[currentHistoryIndex];
+                    redoAction(action);
+                    updateHistoryControls();
+                }
+            });
+            
+            // Функция для отмены действия
+            function undoAction(action) {
+                const ctx = currentScheme.canvas.getContext('2d');
+                const { cellSize } = currentScheme;
+                
+                // Восстанавливаем предыдущее состояние клетки
+                ctx.fillStyle = action.previousColor;
+                ctx.fillRect(action.x * cellSize, action.y * cellSize, cellSize, cellSize);
+                
+                // Восстанавливаем символ
+                const brightness = getBrightness(action.previousColor);
+                ctx.fillStyle = brightness > 128 ? 'black' : 'white';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(action.previousSymbol, action.x * cellSize + cellSize/2, action.y * cellSize + cellSize/2);
+            }
+            
+            // Функция для повтора действия
+            function redoAction(action) {
+                const ctx = currentScheme.canvas.getContext('2d');
+                const { cellSize, colors, symbols } = currentScheme;
+                
+                // Применяем новое состояние клетки
+                ctx.fillStyle = colors[action.newColorIndex];
+                ctx.fillRect(action.x * cellSize, action.y * cellSize, cellSize, cellSize);
+                
+                // Обновляем символ
+                const brightness = getBrightness(colors[action.newColorIndex]);
+                ctx.fillStyle = brightness > 128 ? 'black' : 'white';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(symbols[action.newColorIndex], action.x * cellSize + cellSize/2, action.y * cellSize + cellSize/2);
+            }
+            
+            // Функция для получения яркости цвета
+            function getBrightness(color) {
+                const rgb = color.match(/\d+/g);
+                if (!rgb) return 128;
+                const r = parseInt(rgb[0]);
+                const g = parseInt(rgb[1]);
+                const b = parseInt(rgb[2]);
+                return (r * 299 + g * 587 + b * 114) / 1000;
+            }
+            
+            // Сброс изменений
+            resetBtn.addEventListener('click', function() {
+                if (currentScheme && originalSchemeData) {
+                    // Восстанавливаем оригинальную схему
+                    const ctx = currentScheme.canvas.getContext('2d');
+                    ctx.putImageData(originalSchemeData, 0, 0);
+                    
+                    // Очищаем историю
+                    actionHistory = [];
+                    currentHistoryIndex = -1;
+                    updateHistoryControls();
+                }
+            });
+            
+            // Генерация схемы
+            generateBtn.addEventListener('click', function() {
+                if (!uploadedImage) {
+                    alert('Пожалуйста, загрузите изображение');
+                    return;
+                }
+                
+                loading.style.display = 'block';
+                preview.innerHTML = '<p>Схема появится здесь после обработки</p><div class="edit-tooltip" id="editTooltip">Кликните для изменения цвета</div>';
+                legend.innerHTML = '';
+                schemeInfo.innerHTML = '';
+                isEditMode = false;
+                editModeBtn.classList.remove('active');
+                editModeBtn.textContent = '✏️ Режим редактирования';
+                
+                // Очищаем историю
+                actionHistory = [];
+                currentHistoryIndex = -1;
+                updateHistoryControls();
+                
+                // Имитация обработки
+                setTimeout(generateScheme, 500);
+            });
+            
+            function generateScheme() {
+                const colors = parseInt(colorsCount.value);
+                const grid = parseInt(gridSize.value);
+                const symbols = symbolsType.value;
+                
+                // Создаем canvas для обработки изображения
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Устанавливаем размеры для обработки
+                const maxSize = 500;
+                let width = uploadedImage.width;
+                let height = uploadedImage.height;
+                
+                // Масштабируем изображение для обработки
+                if (width > maxSize || height > maxSize) {
+                    const ratio = Math.min(maxSize / width, maxSize / height);
+                    width = Math.floor(width * ratio);
+                    height = Math.floor(height * ratio);
+                }
+                
+                tempCanvas.width = width;
+                tempCanvas.height = height;
+                tempCtx.drawImage(uploadedImage, 0, 0, width, height);
+                
+                // Получаем данные изображения
+                const imageData = tempCtx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                // Уменьшаем количество цветов
+                const quantizedData = quantizeImage(data, colors);
+                
+                // Создаем canvas для отображения схемы
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Рассчитываем размеры сетки
+                const cellSize = 10;
+                const gridWidth = grid;
+                const gridHeight = Math.round(grid * (height / width));
+                
+                canvas.width = gridWidth * cellSize;
+                canvas.height = gridHeight * cellSize;
+                
+                // Рисуем сетку
+                ctx.strokeStyle = '#ddd';
+                ctx.lineWidth = 0.5;
+                
+                for (let x = 0; x <= canvas.width; x += cellSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                
+                for (let y = 0; y <= canvas.height; y += cellSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+                
+                // Собираем палитру цветов
+                const colorMap = new Map();
+                
+                for (let y = 0; y < gridHeight; y++) {
+                    for (let x = 0; x < gridWidth; x++) {
+                        const imgX = Math.floor((x / gridWidth) * width);
+                        const imgY = Math.floor((y / gridHeight) * height);
+                        
+                        const index = (imgY * width + imgX) * 4;
+                        const r = quantizedData[index];
+                        const g = quantizedData[index + 1];
+                        const b = quantizedData[index + 2];
+                        
+                        const colorKey = `${r},${g},${b}`;
+                        
+                        if (!colorMap.has(colorKey)) {
+                            colorMap.set(colorKey, {
+                                color: `rgb(${r},${g},${b})`,
+                                count: 0
+                            });
+                        }
+                        
+                        colorMap.get(colorKey).count++;
+                    }
+                }
+                
+                // Сортируем цвета по частоте использования
+                const sortedColors = Array.from(colorMap.entries())
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .slice(0, colors)
+                    .map(entry => entry[1].color);
+                
+                // Создаем символы для легенды
+                const symbolSets = {
+                    letters: generateLetters(colors),
+                    numbers: generateNumbers(colors),
+                    shapes: generateShapes(colors)
+                };
+                
+                const symbolsSet = symbolSets[symbols];
+                
+                // Создаем легенду
+                legend.innerHTML = '<h3>Легенда цветов:</h3>';
+                
+                for (let i = 0; i < sortedColors.length; i++) {
+                    const color = sortedColors[i];
+                    const symbol = symbolsSet[i];
+                    
+                    const legendItem = document.createElement('div');
+                    legendItem.className = 'legend-item';
+                    legendItem.innerHTML = `
+                        <div class="legend-color" style="background-color: ${color};"></div>
+                        <div class="legend-symbol">${symbol}</div>
+                        <div class="legend-info">Цвет ${i+1} (${color})</div>
+                    `;
+                    legendItem.dataset.colorIndex = i;
+                    
+                    // Выделение цвета в легенде
+                    legendItem.addEventListener('click', function() {
+                        // Снимаем выделение со всех элементов
+                        document.querySelectorAll('.legend-item').forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        // Выделяем текущий элемент
+                        this.classList.add('selected');
+                        selectedColorIndex = parseInt(this.dataset.colorIndex);
+                    });
+                    
+                    // Выделяем первый цвет по умолчанию
+                    if (i === 0) {
+                        legendItem.classList.add('selected');
+                    }
+                    
+                    legend.appendChild(legendItem);
+                }
+                
+                // Заполняем сетку цветами
+                for (let y = 0; y < gridHeight; y++) {
+                    for (let x = 0; x < gridWidth; x++) {
+                        const imgX = Math.floor((x / gridWidth) * width);
+                        const imgY = Math.floor((y / gridHeight) * height);
+                        
+                        const index = (imgY * width + imgX) * 4;
+                        const r = quantizedData[index];
+                        const g = quantizedData[index + 1];
+                        const b = quantizedData[index + 2];
+                        
+                        const color = `rgb(${r},${g},${b})`;
+                        const colorIndex = sortedColors.indexOf(color);
+                        
+                        if (colorIndex !== -1) {
+                            const symbol = symbolsSet[colorIndex];
+                            
+                            ctx.fillStyle = color;
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                            
+                            // Выбираем контрастный цвет для текста
+                            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                            ctx.fillStyle = brightness > 128 ? 'black' : 'white';
+                            
+                            ctx.font = '8px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(symbol, x * cellSize + cellSize/2, y * cellSize + cellSize/2);
+                        }
+                    }
+                }
+                
+                preview.innerHTML = '';
+                preview.appendChild(canvas);
+                
+                // Сохраняем оригинальное состояние схемы
+                originalSchemeData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Добавляем обработчик кликов для редактирования
+                canvas.addEventListener('click', function(e) {
+                    if (!isEditMode) return;
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Определяем клетку
+                    const cellX = Math.floor(x / cellSize);
+                    const cellY = Math.floor(y / cellSize);
+                    
+                    if (cellX >= 0 && cellX < gridWidth && cellY >= 0 && cellY < gridHeight) {
+                        // Получаем текущий цвет и символ клетки
+                        const imageData = ctx.getImageData(cellX * cellSize, cellY * cellSize, 1, 1);
+                        const currentColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
+                        
+                        // Находим текущий символ (читаем текст)
+                        // Для простоты будем считать, что символ соответствует выбранному цвету
+                        const currentSymbol = symbolsSet[selectedColorIndex];
+                        
+                        // Сохраняем действие в историю
+                        const action = {
+                            x: cellX,
+                            y: cellY,
+                            previousColor: currentColor,
+                            previousSymbol: currentSymbol,
+                            newColorIndex: selectedColorIndex
+                        };
+                        
+                        addToHistory(action);
+                        
+                        // Изменяем цвет клетки
+                        const selectedColor = sortedColors[selectedColorIndex];
+                        const symbol = symbolsSet[selectedColorIndex];
+                        
+                        ctx.fillStyle = selectedColor;
+                        ctx.fillRect(cellX * cellSize, cellY * cellSize, cellSize, cellSize);
+                        
+                        // Выбираем контрастный цвет для текста
+                        const colorValues = selectedColor.match(/\d+/g);
+                        const r = parseInt(colorValues[0]);
+                        const g = parseInt(colorValues[1]);
+                        const b = parseInt(colorValues[2]);
+                        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                        ctx.fillStyle = brightness > 128 ? 'black' : 'white';
+                        
+                        ctx.font = '8px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(symbol, cellX * cellSize + cellSize/2, cellY * cellSize + cellSize/2);
+                        
+                        // Показываем подсказку
+                        editTooltip.style.opacity = '1';
+                        editTooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+                        editTooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+                        
+                        setTimeout(() => {
+                            editTooltip.style.opacity = '0';
+                        }, 1000);
+                    }
+                });
+                
+                // Показываем подсказку при наведении в режиме редактирования
+                canvas.addEventListener('mousemove', function(e) {
+                    if (!isEditMode) return;
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const cellX = Math.floor(x / cellSize);
+                    const cellY = Math.floor(y / cellSize);
+                    
+                    if (cellX >= 0 && cellX < gridWidth && cellY >= 0 && cellY < gridHeight) {
+                        canvas.style.cursor = 'crosshair';
+                    } else {
+                        canvas.style.cursor = 'default';
+                    }
+                });
+                
+                // Отображаем информацию о схеме
+                schemeInfo.innerHTML = `
+                    <p>Сетка: ${gridWidth} × ${gridHeight} клеток | Цветов: ${sortedColors.length}</p>
+                `;
+                
+                currentScheme = {
+                    canvas: canvas,
+                    colors: sortedColors,
+                    symbols: symbolsSet,
+                    gridWidth: gridWidth,
+                    gridHeight: gridHeight,
+                    cellSize: cellSize
+                };
+                
+                downloadBtn.disabled = false;
+                printBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+            
+            // Функция для генерации буквенных обозначений (A-Z, AA-ZZ)
+            function generateLetters(count) {
+                const symbols = [];
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                
+                for (let i = 0; i < count; i++) {
+                    if (i < 26) {
+                        symbols.push(letters[i]);
+                    } else {
+                        const firstLetter = letters[Math.floor(i / 26) - 1];
+                        const secondLetter = letters[i % 26];
+                        symbols.push(firstLetter + secondLetter);
+                    }
+                }
+                
+                return symbols;
+            }
+            
+            // Функция для генерации числовых обозначений
+            function generateNumbers(count) {
+                const symbols = [];
+                for (let i = 1; i <= count; i++) {
+                    symbols.push(i.toString());
+                }
+                return symbols;
+            }
+            
+            // Функция для генерации символов
+            function generateShapes(count) {
+                const baseShapes = ['■', '●', '▲', '◆', '♥', '♣', '♦', '♠', '★', '☆', '☀', '☁', '☂', '☃', '☄', '☎', '☑', '☒', '☓', '☔', '☕', '☘', '☙', '☚', '☛', '☜', '☝', '☞', '☟', '☠', '☢', '☣', '☤', '☥', '☦', '☧', '☨', '☩', '☪', '☫', '☬', '☭', '☮', '☯', '☸', '☹', '☺', '☻', '☼', '☽', '☾', '☿', '♀', '♁', '♂', '♃', '♄', '♅', '♆', '♇', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '♔', '♕', '♖', '♗', '♘', '♙', '♚', '♛', '♜', '♝', '♞', '♟', '♠', '♡', '♢', '♣', '♤', '♥', '♦', '♧', '♨', '♩', '♪', '♫', '♬', '♭', '♮', '♯'];
+                
+                const symbols = [];
+                for (let i = 0; i < count; i++) {
+                    symbols.push(baseShapes[i % baseShapes.length]);
+                }
+                return symbols;
+            }
+            
+            // Функция для уменьшения количества цветов
+            function quantizeImage(data, colors) {
+                const result = new Uint8ClampedArray(data.length);
+                
+                // Улучшенная квантизация
+                const step = Math.floor(256 / Math.cbrt(colors));
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // Квантизируем каждый канал
+                    result[i] = Math.floor(r / step) * step + step / 2;
+                    result[i + 1] = Math.floor(g / step) * step + step / 2;
+                    result[i + 2] = Math.floor(b / step) * step + step / 2;
+                    result[i + 3] = data[i + 3];
+                }
+                
+                return result;
+            }
+            
+            // Скачивание схемы
+            downloadBtn.addEventListener('click', function() {
+                if (!currentScheme) return;
+                
+                const link = document.createElement('a');
+                link.download = 'embroidery-scheme.png';
+                link.href = currentScheme.canvas.toDataURL();
+                link.click();
+            });
+            
+            // Печать схемы
+            printBtn.addEventListener('click', function() {
+                if (!currentScheme) return;
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Схема для вышивки</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .scheme { margin-bottom: 30px; text-align: center; }
+                            .legend-item { display: flex; align-items: center; margin-bottom: 10px; }
+                            .legend-color { width: 20px; height: 20px; margin-right: 10px; }
+                            .legend { margin-top: 20px; columns: 2; }
+                            @media (max-width: 768px) {
+                                .legend { columns: 1; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Схема для вышивки</h1>
+                        <div class="scheme">
+                            <img src="${currentScheme.canvas.toDataURL()}" style="max-width: 100%;">
+                        </div>
+                        <div class="legend">
+                            <h2>Легенда цветов:</h2>
+                `);
+                
+                for (let i = 0; i < currentScheme.colors.length; i++) {
+                    const color = currentScheme.colors[i];
+                    const symbol = currentScheme.symbols[i];
+                    
+                    printWindow.document.write(`
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${color};"></div>
+                            <div>${symbol} - Цвет ${i+1}</div>
+                        </div>
+                    `);
+                }
+                
+                printWindow.document.write(`
+                        </div>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            });
+        });
+    </script>
+</body>
+</html>
